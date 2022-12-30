@@ -1,0 +1,165 @@
+<html>
+
+<head>
+    <title>Wahltinez Recipes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <!-- <link rel="stylesheet" href="https://unpkg.com/picnic@7.1.0/picnic.min.css"> -->
+    <style>
+        #app {
+            padding: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+
+        <div v-show="!submenu">
+            <div class="flex flex-wrap">
+                <div v-for="item in submenus" class="block w-full md:w-1/2 lg:w-1/4">
+                    <div class="m-4 justify-center cursor-pointer" @click="loadSubmenu(item)">
+                        <div class="block p-4 rounded-lg shadow-lg bg-white">
+                            <span class="text-gray-900 text-xl leading-tight font-medium mb-2">{{item}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div v-show="submenu">
+            <details v-if="bartender" class="ml-6">
+                <summary class="cursor-pointer">Show Filters</summary>
+
+                <div class="ml-3.5">
+                    <h4>Tags</h4>
+                    <div class="flex flex-wrap ml-2">
+                        <label class="flex space-x-2 w-1/2 md:w-1/4 lg:w-1/8" v-for="tag in Object.keys(tags)">
+                            <input class="inline-block" type="checkbox" v-model="tags[tag]">
+                            <span class="inline-block align-top -mt-0.5">{{tag}}</span>
+                        </label>
+                    </div>
+
+                    <h4>Ingredients</h4>
+                    <div class="flex flex-wrap ml-2">
+                        <label class="flex space-x-2 w-1/2 md:w-1/4 lg:w-1/8"
+                            v-for="ingredient in Object.keys(ingredients)">
+                            <input class="inline-block" type="checkbox" v-model="ingredients[ingredient]">
+                            <span class="inline-block align-top -mt-0.5">{{ingredient}}</span>
+                        </label>
+                    </div>
+                </div>
+            </details>
+
+            <div class="flex flex-wrap">
+                <div v-for="item in menu" class="block w-full md:w-1/2 lg:w-1/4">
+                    <div class="m-4 justify-center">
+                        <div class="block p-4 rounded-lg shadow-lg bg-white">
+                            <h3 class="text-gray-900 text-xl leading-tight font-medium mb-2">{{item.name}}</h3>
+                            <span class="text-sm">{{item.description}}</span>
+                            <div v-if="bartender">
+                                <details>
+                                    <summary class="cursor-pointer">Ingredients</summary>
+                                    <ul class="m-0">
+                                        <li v-for="(measure, ingredient) in item.ingredients">
+                                            <small>{{ingredient}}: {{measure}}</small>
+                                        </li>
+                                    </ul>
+                                </details>
+                                <details>
+                                    <summary class="cursor-pointer">Instructions</summary>
+                                    <ul class="m-0">
+                                        <li v-for="step in item.instructions">
+                                            <small>{{step}}</small>
+                                        </li>
+                                    </ul>
+                                </details>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    </div>
+</body>
+
+
+<script async type="module">
+
+    // Load an index with all submenus.
+    const index = await fetch('./index.json').then(res => res.json());
+
+    const app = Vue.createApp({
+        data() {
+            return {
+                // selfUrl: new URL(window.location),
+                submenus: Object.keys(index),
+                allMenuItems: [],
+                tags: {},
+                ingredients: {},
+                urlParams: new Map(),
+            }
+        },
+        computed: {
+            menu() {
+                return this.allMenuItems
+                    .filter(item => item.tags.some(x => this.tags[x]))
+                    .filter(item => Object.keys(item.ingredients).every(x => this.ingredients[x]));
+            },
+            submenu() {
+                return this.urlParams.get('submenu');
+            },
+            bartender() {
+                return this.urlParams.get('bartender');
+            },
+        },
+        methods: {
+            loadSubmenu: async function (submenu) {
+
+                // Load menu from item list.
+                this.allMenuItems = await Promise.all(index[submenu].map(async fname =>
+                    fetch(fname).then(res => res.text()).then(jsyaml.load)));
+
+                // Parse filters from tags and ingredients.
+                const filters = { tags: {}, ingredients: {} };
+                this.allMenuItems.forEach(item => item.tags.forEach(x => filters.tags[x] = true));
+                this.allMenuItems.forEach(item => Object.keys(item.ingredients).forEach(x => filters.ingredients[x] = true));
+
+                this.tags = filters.tags;
+                this.ingredients = filters.ingredients;
+
+                // Update the URL params.
+                this.urlParams = new Map(this.urlParams.set('submenu', submenu));
+            },
+        },
+        watch: {
+            urlParams(value) {
+                const url = new URL(window.location);
+                Array.from(value.entries()).forEach(([k, v]) => url.searchParams.set(k, v));
+                window.history.pushState(null, '', url);
+            },
+        }
+    }).mount('#app');
+
+    const getParams = () =>
+        Array.from(new URL(window.location).searchParams.entries())
+            .reduce((m, [k, v]) => m.set(k, v), new Map());
+
+    // Use query parameters to preselect options.
+    app.urlParams = getParams();
+    if (app.submenu) app.loadSubmenu(app.submenu);
+
+    // When the URL is changed, trigger reload.
+    window.addEventListener('popstate', () => app.urlParams = getParams());
+
+</script>
+
+</html>

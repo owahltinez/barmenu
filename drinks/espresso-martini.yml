@@ -1,0 +1,16 @@
+name: Espresso Martini
+description: Perfect for coffee lovers
+container: martini glass
+ingredients:
+  vodka: 30 ml
+  kahlua: 30 ml
+  espresso: 30 ml
+  almond milk: 30 ml
+instructions:
+  - (Optional) Add chocolate syrup for flavoured variation
+  - Add all ingredients and two ice cubes to blender
+  - Blend mix until slightly foamy
+  - Serve in martini glass
+tags:
+  - classic
+  - coffee
