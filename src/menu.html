@@ -79,7 +79,7 @@
   window.document.title = `${menuName[0].toUpperCase() + menuName.slice(1)} Menu`;
 
   const menu = await(async () => {
-    const items = await fetch(`../${params.get('menu')}.json`).then(res => res.json());
+    const items = await fetch(`${menuName}.json`).then(res => res.json());
     const tags = items.flatMap(item => item.tags);
     const ingredients = items.flatMap(item => Object.keys(item.ingredients));
     const listToDict = arr => arr.reduce((dict, x) => Object.assign(dict, { [x]: true }), {});
