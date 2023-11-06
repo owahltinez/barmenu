@@ -1,0 +1,115 @@
+<html>
+
+<head>
+  <title>{{ menu }}</title>
+  <link rel="icon" type="image/jpeg" href="logo.jpg">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="//unpkg.com/petite-vue"></script>
+  <script src="//unpkg.com/js-yaml"></script>
+  <script src="//cdn.tailwindcss.com"></script>
+</head>
+
+<body v-scope="{ items, tags, ingredients }" class="bg-slate-50 text-sans p-4">
+
+  <include src="./header.tpl.html"></include>
+
+  <main class="mt-8 ml-8">
+
+    <details class="pl-2">
+      <summary class="cursor-pointer">Show Filters</summary>
+
+      <h4 class="mt-2">Tags</h4>
+      <div class="flex flex-wrap">
+        <label v-for="tag in Object.keys(tags)" class="w-48 pr-2">
+          <input type="checkbox" v-model="tags[tag]">
+          <span class="checkable">{{ tag }}</span>
+        </label>
+      </div>
+
+      <h4 class="mt-2">Ingredients</h4>
+      <div class="flex flex-wrap">
+        <label v-for="ingredient in Object.keys(ingredients)" class="w-48 pr-2">
+          <input type="checkbox" v-model="ingredients[ingredient]">
+          <span class="checkable">{{ingredient}}</span>
+        </label>
+      </div>
+    </details>
+
+    <div class="flex flex-wrap gap-4 mt-4">
+      <div v-for="item in items()" class="p-4 w-64 min-h-48 border border-2 border-stone-300 bg-stone-50 rounded-md">
+
+        <div>
+          <h3>{{item.name}}</h3>
+          <small>{{item.description}}</small>
+        </div>
+
+        <div>
+
+          <details>
+            <summary class="cursor-pointer">Ingredients</summary>
+            <ul class="">
+              <li v-for="(measure, ingredient) in item.ingredients">
+                <small>{{ingredient}}: {{measure}}</small>
+              </li>
+            </ul>
+          </details>
+
+          <details>
+            <summary class="cursor-pointer">Instructions</summary>
+            <ul class="">
+              <li v-for="step in item.instructions">
+                <small>{{step}}</small>
+              </li>
+            </ul>
+          </details>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+</body>
+
+<script src="//unpkg.com/mancha" init></script>
+
+<script type="module">
+  const params = new URL(window.location.href).searchParams;
+  const menuName = params.get('menu');
+  window.document.title = `${menuName[0].toUpperCase() + menuName.slice(1)} Menu`;
+
+  const menu = await(async () => {
+    const items = await fetch(`../${params.get('menu')}.json`).then(res => res.json());
+    const tags = items.flatMap(item => item.tags);
+    const ingredients = items.flatMap(item => Object.keys(item.ingredients));
+    const listToDict = arr => arr.reduce((dict, x) => Object.assign(dict, { [x]: true }), {});
+    return {
+      tags: listToDict(tags),
+      ingredients: listToDict(ingredients),
+      items: function () {
+        const tags = Object.keys(this.tags).filter(x => this.tags[x]);
+        const ingredients = Object.keys(this.ingredients).filter(x => this.ingredients[x]);
+        return items
+          .filter(x => x.tags.every(x => tags.includes(x)))
+          .filter(x => Object.keys(x.ingredients).every(x => ingredients.includes(x)));
+      },
+    }
+  })();
+
+  // Filter tags if params require it.
+  if (params.get("tags")) {
+    Object.keys(menu.tags).forEach(x => menu.tags[x] = false);
+    params.get('tags').split(',').forEach(x => menu.tags[x] = true);
+  }
+
+  // Filter ingredients if params require it.
+  if (params.get("ingredients")) {
+    Object.keys(menu.ingredients).forEach(x => menu.ingredients[x] = false);
+    params.get('ingredients').split(',').forEach(x => menu.ingredients[x] = true);
+  }
+
+  PetiteVue.createApp({ ...menu }).mount();
+</script>
+
+
+</html>

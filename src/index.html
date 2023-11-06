@@ -1,0 +1,31 @@
+<html>
+
+<head>
+  <title>Wahltinez Recipes</title>
+  <link rel="icon" type="image/jpeg" href="logo.jpg">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="//unpkg.com/js-yaml"></script>
+  <script src="//cdn.tailwindcss.com"></script>
+  <script src="//unpkg.com/petite-vue"></script>
+</head>
+
+<body v-scope="{ menus: ['food', 'drinks'] }" class="p-4 bg-slate-50 text-sans">
+
+  <include src="./header.tpl.html"></include>
+
+  <main class="flex items-center justify-center h-screen w-screen">
+    <div v-for="menu in menus">
+      <a class="text-no-underline" v-bind:href="'menu.html?menu=' + menu">
+        <button
+          class="m-8 py-4 px-8 w-64 cursor-pointer bg-stone-100 border border-4 border-stone-700 hover:bg-stone-300 rounded">
+          <span class="text-2xl font-bold text-stone-700 uppercase tracking-widest">{{menu}}</span>
+        </button>
+      </a>
+    </div>
+  </main>
+</body>
+
+<script src="//unpkg.com/mancha" init onrender="PetiteVue.createApp().mount()"></script>
+
+</html>
