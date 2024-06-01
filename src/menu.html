@@ -6,11 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="//cdn.tailwindcss.com"></script>
   <script src="//unpkg.com/js-yaml"></script>
-  <script src="//unpkg.com/petite-vue"></script>
-  <script src="//unpkg.com/mancha"></script>
+  <script src="//unpkg.com/mancha@0.6.4" init></script>
 </head>
 
-<body v-scope="{ items, tags, ingredients }" class="bg-slate-50 text-sans p-4">
+<body :data="{ items, tags, ingredients }" class="bg-slate-50 text-sans p-4">
 
   <include src="./header.tpl.html"></include>
 
@@ -21,23 +20,23 @@
 
       <h4 class="mt-2">Tags</h4>
       <div class="flex flex-wrap">
-        <label v-for="tag in Object.keys(tags)" class="w-48 pr-2">
-          <input type="checkbox" v-model="tags[tag]">
+        <label :for="tag in Object.keys(tags)" class="w-48 pr-2">
+          <input type="checkbox" :bind="tags[tag]">
           <span class="checkable">{{ tag }}</span>
         </label>
       </div>
 
       <h4 class="mt-2">Ingredients</h4>
       <div class="flex flex-wrap">
-        <label v-for="ingredient in Object.keys(ingredients)" class="w-48 pr-2">
-          <input type="checkbox" v-model="ingredients[ingredient]">
+        <label :for="ingredient in Object.keys(ingredients)" class="w-48 pr-2">
+          <input type="checkbox" :bind="ingredients[ingredient]">
           <span class="checkable">{{ ingredient }}</span>
         </label>
       </div>
     </details>
 
     <div class="flex flex-wrap gap-4 mt-4">
-      <div v-for="item in items()" class="p-4 w-64 min-h-48 border border-2 border-stone-300 bg-stone-50 rounded-md">
+      <div :for="item in items()" class="p-4 w-64 min-h-48 border border-2 border-stone-300 bg-stone-50 rounded-md">
 
         <div>
           <h3>{{ item.name }}</h3>
@@ -49,8 +48,8 @@
           <details>
             <summary class="cursor-pointer">Ingredients</summary>
             <ul class="">
-              <li v-for="(measure, ingredient) in item.ingredients">
-                <small>{{ ingredient }}: {{ measure }}</small>
+              <li :for="entry in Object.entries(item.ingredients)">
+                <small>{{ entry[0] }}: {{ entry[1] }}</small>
               </li>
             </ul>
           </details>
@@ -58,7 +57,7 @@
           <details>
             <summary class="cursor-pointer">Instructions</summary>
             <ul class="">
-              <li v-for="step in item.instructions">
+              <li :for="step in item.instructions">
                 <small>{{ step }}</small>
               </li>
             </ul>
@@ -107,8 +106,7 @@
     params.get('ingredients').split(',').forEach(x => menu.ingredients[x] = true);
   }
 
-  document.body.innerHTML = await Mancha.renderContent(document.body.innerHTML);
-  PetiteVue.createApp({ ...menu }).mount();
+  await Mancha.update({ ...menu });
 </script>
 
 
