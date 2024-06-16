@@ -4,65 +4,42 @@
   <title>{{ menu }}</title>
   <link rel="icon" type="image/jpeg" href="logo.jpg">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="//cdn.tailwindcss.com"></script>
   <script src="//unpkg.com/js-yaml"></script>
-  <script src="//unpkg.com/mancha@0.6.4" init></script>
+  <script src="//unpkg.com/mancha@0.8.44" css="utils" init defer></script>
 </head>
 
-<body :data="{ items, tags, ingredients }" class="bg-slate-50 text-sans p-4">
+<body :data="{ items: [] }" class="bg-blue-gray-50 font-sans p-4 flex flex-col justify-center items-center">
 
   <include src="./header.tpl.html"></include>
 
-  <main class="mt-8 ml-8">
+  <main class="mx-8 mt-0 md:mt-8 max-w-1024px">
 
-    <details class="pl-2">
-      <summary class="cursor-pointer">Show Filters</summary>
+    <div class="flex flex-wrap justify-center gap-4 mt-4">
+      <div :for="item in items" class="p-4 w-60 min-h-32 border border-2 border-blue-gray-300 bg-gray-200 rounded-md">
 
-      <h4 class="mt-2">Tags</h4>
-      <div class="flex flex-wrap">
-        <label :for="tag in Object.keys(tags)" class="w-48 pr-2">
-          <input type="checkbox" :bind="tags[tag]">
-          <span class="checkable">{{ tag }}</span>
-        </label>
-      </div>
-
-      <h4 class="mt-2">Ingredients</h4>
-      <div class="flex flex-wrap">
-        <label :for="ingredient in Object.keys(ingredients)" class="w-48 pr-2">
-          <input type="checkbox" :bind="ingredients[ingredient]">
-          <span class="checkable">{{ ingredient }}</span>
-        </label>
-      </div>
-    </details>
-
-    <div class="flex flex-wrap gap-4 mt-4">
-      <div :for="item in items()" class="p-4 w-64 min-h-48 border border-2 border-stone-300 bg-stone-50 rounded-md">
-
-        <div>
-          <h3>{{ item.name }}</h3>
-          <small>{{ item.description }}</small>
+        <div class="mb-2">
+          <h3 class="m-0 mb-2">{{ item.name }}</h3>
+          <small class="block">{{ item.description }}</small>
         </div>
 
         <div>
-
-          <details>
-            <summary class="cursor-pointer">Ingredients</summary>
-            <ul class="">
+          <details class="pt-2">
+            <summary class="cursor-pointer hover:underline transition">Ingredients</summary>
+            <ul class="-ml-4 mt-1 mb-0">
               <li :for="entry in Object.entries(item.ingredients)">
                 <small>{{ entry[0] }}: {{ entry[1] }}</small>
               </li>
             </ul>
           </details>
 
-          <details>
-            <summary class="cursor-pointer">Instructions</summary>
-            <ul class="">
+          <details class="pt-2">
+            <summary class="cursor-pointer hover:underline transition">Instructions</summary>
+            <ul class="-ml-4 mt-1 mb-0">
               <li :for="step in item.instructions">
                 <small>{{ step }}</small>
               </li>
             </ul>
           </details>
-
         </div>
 
       </div>
@@ -76,37 +53,15 @@
   const menuName = params.get('menu');
   window.document.title = `${menuName[0].toUpperCase() + menuName.slice(1)} Menu`;
 
-  const menu = await(async () => {
-    const items = await fetch(`${menuName}.json`).then(res => res.json());
-    const tags = items.flatMap(item => item.tags);
-    const ingredients = items.flatMap(item => Object.keys(item.ingredients));
-    const listToDict = arr => arr.reduce((dict, x) => Object.assign(dict, { [x]: true }), {});
-    return {
-      tags: listToDict(tags),
-      ingredients: listToDict(ingredients),
-      items: function () {
-        const tags = Object.keys(this.tags).filter(x => this.tags[x]);
-        const ingredients = Object.keys(this.ingredients).filter(x => this.ingredients[x]);
-        return items
-          .filter(x => x.tags.every(x => tags.includes(x)))
-          .filter(x => Object.keys(x.ingredients).every(x => ingredients.includes(x)));
-      },
-    }
-  })();
-
-  // Filter tags if params require it.
-  if (params.get("tags")) {
-    Object.keys(menu.tags).forEach(x => menu.tags[x] = false);
-    params.get('tags').split(',').forEach(x => menu.tags[x] = true);
+  const fetchYaml = async (url) => {
+    const res = await fetch(url);
+    const text = await res.text();
+    return jsyaml.load(text);
   }
 
-  // Filter ingredients if params require it.
-  if (params.get("ingredients")) {
-    Object.keys(menu.ingredients).forEach(x => menu.ingredients[x] = false);
-    params.get('ingredients').split(',').forEach(x => menu.ingredients[x] = true);
-  }
-
-  await Mancha.update({ ...menu });
+  const { $ } = Mancha;
+  const index = await fetchYaml(`recipes/${menuName}/index.yml`);
+  $.items = await Promise.all(index.map(x => fetchYaml(`recipes/${menuName}/${x}.yml`)));
 </script>
 
 

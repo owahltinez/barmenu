@@ -1,0 +1,9 @@
+{
+  "name": "barmenu",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npx http-server -p 0 ./src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT"
+}
