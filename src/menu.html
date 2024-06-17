@@ -5,7 +5,7 @@
   <link rel="icon" type="image/png" href="logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="//unpkg.com/js-yaml"></script>
-  <script src="//unpkg.com/mancha@0.8.50" css="utils" init defer></script>
+  <script src="//unpkg.com/mancha@0.8.53" css="utils" init defer></script>
 </head>
 
 <body :data="{ items: [], recipes: false }"
@@ -13,7 +13,7 @@
 
   <include src="./header.tpl.html"></include>
 
-  <main class="sm:mt-8 max-w-1024px">
+  <main class="sm:mt-8 max-w-1024px h-0 transition overflow-hidden" style="transition-duration: 1s;">
 
     <div class="flex flex-wrap justify-center -mt-4">
       <div :for="item in items" class="w-full sm:w-50% flex-grow">
@@ -31,7 +31,7 @@
               <span class="text-justify flex-1" :for="entry in Object.entries(item.ingredients)">
                 <small>{{ entry[0] }}: {{ entry[1] }}</small>
               </span>
-            </ul>
+              </ul>
           </details>
 
           <details class="pt-2">
@@ -39,8 +39,8 @@
             <div class="flex flex-col pt-2">
               <span class="text-justify" :for="step in item.instructions">
                 <small>{{ step }}</small>
-              </li>
-            </span>
+                </li>
+              </span>
           </details>
         </div>
 
@@ -64,6 +64,9 @@
   const { $ } = Mancha;
   const index = await fetchYaml(`recipes/${menuName}/_index.yml`);
   $.items = await Promise.all(index.map(x => fetchYaml(`recipes/${menuName}/${x}.yml`)));
+
+  // Animate the page load.
+  document.querySelector('main').classList.add('h-100%');
 </script>
 
 
