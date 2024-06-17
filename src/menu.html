@@ -13,7 +13,7 @@
 
   <include src="./header.tpl.html"></include>
 
-  <main class="sm:mt-8 max-w-1024px h-0 transition overflow-hidden" style="transition-duration: 1s;">
+  <main class="sm:mt-8 max-w-1024px">
 
     <div class="flex flex-wrap justify-center -mt-4">
       <div :for="item in items" class="w-full sm:w-50% flex-grow">
@@ -64,9 +64,6 @@
   const { $ } = Mancha;
   const index = await fetchYaml(`recipes/${menuName}/_index.yml`);
   $.items = await Promise.all(index.map(x => fetchYaml(`recipes/${menuName}/${x}.yml`)));
-
-  // Animate the page load.
-  document.querySelector('main').classList.add('h-100%');
 </script>
 
 
