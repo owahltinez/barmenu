@@ -1,11 +1,11 @@
-<html>
+<html lang="en">
 
 <head>
   <title>{{ menu }}</title>
   <link rel="icon" type="image/png" href="logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="//unpkg.com/js-yaml"></script>
-  <script src="//unpkg.com/mancha@0.8.53" css="utils" init defer></script>
+  <script src="//unpkg.com/mancha@0.8.53" css="utils" init></script>
 </head>
 
 <body :data="{ items: [], recipes: false }"
@@ -13,7 +13,7 @@
 
   <include src="./header.tpl.html"></include>
 
-  <main class="sm:mt-8 max-w-1024px">
+  <main class="sm:mt-8 max-w-1024px transition hidden opacity-0" style="transition-duration: 750ms">
 
     <div class="flex flex-wrap justify-center -mt-4">
       <div :for="item in items" class="w-full sm:w-50% flex-grow">
@@ -47,6 +47,8 @@
       </div>
     </div>
   </main>
+
+  <div :show="false" class="absolute top-0 left-0 right-0 bottom-0 bg-blue-gray-50"></div>
 </body>
 
 
@@ -64,6 +66,10 @@
   const { $ } = Mancha;
   const index = await fetchYaml(`recipes/${menuName}/_index.yml`);
   $.items = await Promise.all(index.map(x => fetchYaml(`recipes/${menuName}/${x}.yml`)));
+
+  document.querySelector('main').classList.remove('hidden');
+  await new Promise(resolve => setTimeout(resolve, 100));
+  document.querySelector('main').classList.remove('opacity-0');
 </script>
 
 
