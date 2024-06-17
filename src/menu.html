@@ -2,43 +2,45 @@
 
 <head>
   <title>{{ menu }}</title>
-  <link rel="icon" type="image/jpeg" href="logo.jpg">
+  <link rel="icon" type="image/png" href="logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="//unpkg.com/js-yaml"></script>
-  <script src="//unpkg.com/mancha@0.8.44" css="utils" init defer></script>
+  <script src="//unpkg.com/mancha@0.8.50" css="utils" init defer></script>
 </head>
 
-<body :data="{ items: [] }" class="bg-blue-gray-50 font-sans p-4 flex flex-col justify-center items-center">
+<body :data="{ items: [], recipes: false }"
+  class="bg-blue-gray-50 font-serif p-4 flex flex-col justify-center items-center">
 
   <include src="./header.tpl.html"></include>
 
-  <main class="mx-8 mt-0 md:mt-8 max-w-1024px">
+  <main class="sm:mt-8 max-w-1024px">
 
-    <div class="flex flex-wrap justify-center gap-4 mt-4">
-      <div :for="item in items" class="p-4 w-60 min-h-32 border border-2 border-blue-gray-300 bg-gray-200 rounded-md">
+    <div class="flex flex-wrap justify-center -mt-4">
+      <div :for="item in items" class="w-full sm:w-50% flex-grow">
+        <div class="w-full h-2px bg-blue-gray-100 my-4"></div>
 
-        <div class="mb-2">
-          <h3 class="m-0 mb-2">{{ item.name }}</h3>
+        <div class="text-center">
+          <h3 class="font-cursive m-0 mb-2">{{ item.name }}</h3>
           <small class="block">{{ item.description }}</small>
         </div>
 
-        <div>
-          <details class="pt-2">
-            <summary class="cursor-pointer hover:underline transition">Ingredients</summary>
-            <ul class="-ml-4 mt-1 mb-0">
-              <li :for="entry in Object.entries(item.ingredients)">
+        <div :show="recipes" class="flex flex-col items-center">
+          <details class="pt-2 items-center">
+            <summary class="text-center cursor-pointer hover:underline transition">Ingredients</summary>
+            <div class="flex flex-col pt-2">
+              <span class="text-justify flex-1" :for="entry in Object.entries(item.ingredients)">
                 <small>{{ entry[0] }}: {{ entry[1] }}</small>
-              </li>
+              </span>
             </ul>
           </details>
 
           <details class="pt-2">
-            <summary class="cursor-pointer hover:underline transition">Instructions</summary>
-            <ul class="-ml-4 mt-1 mb-0">
-              <li :for="step in item.instructions">
+            <summary class="text-center cursor-pointer hover:underline transition">Instructions</summary>
+            <div class="flex flex-col pt-2">
+              <span class="text-justify" :for="step in item.instructions">
                 <small>{{ step }}</small>
               </li>
-            </ul>
+            </span>
           </details>
         </div>
 
@@ -60,7 +62,7 @@
   }
 
   const { $ } = Mancha;
-  const index = await fetchYaml(`recipes/${menuName}/index.yml`);
+  const index = await fetchYaml(`recipes/${menuName}/_index.yml`);
   $.items = await Promise.all(index.map(x => fetchYaml(`recipes/${menuName}/${x}.yml`)));
 </script>
 

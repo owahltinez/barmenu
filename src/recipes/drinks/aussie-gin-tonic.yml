@@ -1,5 +1,5 @@
-name: Australian Gin & Tonic
-description: Gin and tonic, the Aussie way
+name: Gin & Tonic
+description: gin and tonic, the Aussie way with orange slice
 container: highball glass
 ingredients:
   gin: 60 ml

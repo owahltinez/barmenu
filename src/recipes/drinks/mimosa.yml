@@ -1,5 +1,5 @@
 name: Mimosa
-description: It's not a brunch without it
+description: brunch is way more fun if you're getting plastered
 container: champagne glass
 ingredients:
   sparkling wine: 60 ml
@@ -8,5 +8,5 @@ instructions:
   - Pour sparkling wine into champagne glass
   - Pour orange juice into champagne glass
 tags:
-  - classy
+  - trashy
   - sparkling
