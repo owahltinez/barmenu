@@ -4,7 +4,8 @@
   <title>{{ menu }}</title>
   <link rel="icon" type="image/png" href="logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="//unpkg.com/js-yaml"></script>
+  <script src="//unpkg.com/js-yaml@4.1.0" defer></script>
+  <script src="//unpkg.com/showdown@2.1.0/dist/showdown.min.js" defer></script>
   <script src="//unpkg.com/mancha@0.8.53" css="utils" init></script>
 </head>
 
@@ -21,7 +22,7 @@
 
         <div class="text-center">
           <h3 class="font-cursive m-0 mb-2">{{ item.name }}</h3>
-          <small class="block">{{ item.description }}</small>
+          <small class="block" $html="converter.makeHtml(item.description)"></small>
         </div>
 
         <div :show="recipes" class="flex flex-col items-center">
@@ -52,7 +53,7 @@
 </body>
 
 
-<script type="module">
+<script type="module" defer>
   const params = new URL(window.location.href).searchParams;
   const menuName = params.get('menu');
   window.document.title = `${menuName[0].toUpperCase() + menuName.slice(1)} Menu`;
@@ -64,6 +65,7 @@
   }
 
   const { $ } = Mancha;
+  $.converter = new showdown.Converter();
   const index = await fetchYaml(`recipes/${menuName}/_index.yml`);
   $.items = await Promise.all(index.map(x => fetchYaml(`recipes/${menuName}/${x}.yml`)));
 
