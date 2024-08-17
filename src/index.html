@@ -4,20 +4,23 @@
   <title>Wahltinez Recipes</title>
   <link rel="icon" type="image/png" href="logo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="//unpkg.com/mancha@0.8.50" css="utils" defer init></script>
+  <script src="//unpkg.com/mancha@0.9.4" css="utils" defer init></script>
+  <!-- <script src="//fresho-dev.github.io/mancha/dist/mancha.js" css="utils" defer init debug></script> -->
 </head>
 
-<body :data="{ menus: ['food', 'drinks'] }" class="p-4 bg-blue-gray-50 text-sans">
+<body :data="{ menus: ['food', 'drinks'] }" class="p-4 bg-blue-gray-50 text-sans flex flex-col gap-y-8">
 
   <include src="./header.tpl.html"></include>
 
-  <main class="flex items-center justify-center w-full mt-25%">
+  <main class="flex items-center justify-center w-full">
     <div class="flex flex-col">
       <div :for="menu in menus">
-        <button @click="window.location.href = `./menu.html?menu=${menu}`"
-          class="m-8 py-4 px-8 w-64 cursor-pointer bg-gray-200 border border-3 border-blue-gray-700 hover:bg-blue-gray-300 rounded transition">
-          <span class="text-2xl font-bold text-gray-800 uppercase">{{ menu }}</span>
-        </button>
+        <a :href="decodeURIComponent('./menu.html?menu%3D' + menu)">
+          <button
+            class="m-8 py-4 px-8 w-64 cursor-pointer bg-gray-200 border border-3 border-blue-gray-700 hover:bg-blue-gray-300 rounded transition">
+            <span class="text-2xl font-bold text-gray-800 uppercase">{{ menu }}</span>
+          </button>
+        </a>
       </div>
     </div>
   </main>
